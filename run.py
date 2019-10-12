@@ -92,23 +92,21 @@ save_settings()
 
 
 def kill_existing_oc():
-    pids = list()
     try:
+        pids = list()
         with open(pid_file_path, 'r') as file:
             pid = file.read().replace('\n', '')
             pids.append(str(pid))
         if current_pid:
             pids.append(str(current_pid))
+        if pids:
+            os.system("echo {login_pass}|sudo -S kill -9 {pids}".format(login_pass=login_pass, pids=' '.join(pids)))
     except:
         pass
-    if pids:
-        os.system("echo {login_pass}|sudo -S kill -9 {pids}".format(login_pass=login_pass, pids=' '.join(pids)))
 
 
 def reconnect_oc():
-    global server, username, password, settings_path, get_from_env, current_pid, login_pass
-    if not login_pass:
-        login_pass = getpass('Password: ')
+    global server, username, password, settings_path, get_from_env, current_pid
 
     print('reconnecting oc...')
 
@@ -123,12 +121,15 @@ def reconnect_oc():
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         current_pid = p.pid
         return
-
     oc_cmd = "echo '{password}' | openconnect -u {username} --authgroup MGT --servercert {cert} {server} " \
              "--passwd-on-stdin --background --pid-file {pid_file_path}" \
         .format(password=password, username=username, cert=cert, server=server, pid_file_path=pid_file_path)
     os.system(oc_cmd)
 
+
+if not force_run:
+    if not login_pass:
+        login_pass = getpass('Password: ')
 
 kill_existing_oc()
 
