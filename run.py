@@ -13,7 +13,9 @@ settings = {}
 
 def load_settings():
     global settings
-    with open(settings_path, 'r+') as f:
+    if not os.path.exists(settings_path):
+        return
+    with open(settings_path, 'r') as f:
         settings = f.read()
         settings = json.loads(settings)
     return settings
