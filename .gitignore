@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+*.swp
+
+# Distribution / packaging
+.Python
+env/
+venv/
+
+
+# IDE
+.idea/
+
+
+# pyenv file
+.python-version
+
+*_temp*
+
+settings.json
+oc.pid
