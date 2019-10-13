@@ -10,6 +10,7 @@ from settings import settings, config
 
 settings.load()
 ping_address = config.get('ping_address', '8.8.8.8')
+
 current_pid = None
 get_from_env = True
 
