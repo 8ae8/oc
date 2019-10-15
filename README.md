@@ -3,10 +3,26 @@ OpenConnect client handler
 
 It's only a simple script to ensure that VPN connection is stable 
 due to current network problems in my location
-(I'm living in Iran and we have been banned for opening many websites!) :/
+(I'm living in Iran and we have been banned from opening many websites!) :/
 Anyways, Forgive me for any mistakes.   
 It was only tested on my own system (ubuntu 18), 
 and system of couple of my friends and it worked as well as it supposed to.
+
+## How it works
+
+It's just like running openconnect command.
+but with a few differences to ensure your connection is stable!
+When you run the scrip:
+- It runs openconnect in background and connects to VPN server.
+- Pings everytime to `8.8.8.8` (sorry for that its hard coded, should be configurable in setup step :D)
+- If ping time exceeded the maximum value of setting (which is configurable on setup section).
+  tries 3 times, if still has the higher ping time than what is set, reconnects the VPN
+- If ping time is lower than zero (usually on network problems, ping time would be -1) does the same as previous step
+
+Just like that. it just checks the internet stability and reconnects the VPN if there is a problem.   
+Sometimes when i suspend or hibernate my system. 
+after a while when i come back and turn my computer on, 
+I don't have to reconnect my VPN connection again, Its connected whole the time. 
 
 
 ## Requirements
@@ -22,6 +38,10 @@ and system of couple of my friends and it worked as well as it supposed to.
     sudo apt update
     sudo apt install python3.6
     ``` 
+3. Login for openconnect VPN server
+    
+    > Surely you need an account of openconnect to connect to VPN server.
+    As you know, its only a script to improve stability of VPN connectivity, not a VPN server :))
 
 
 ##  Steps
