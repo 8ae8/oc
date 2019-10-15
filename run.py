@@ -22,12 +22,14 @@ if '-s' in sys.argv:
 
 
 def setup():
-    settings.setup()
+    settings.setup(load_from_env=False)
     settings.save()
 
 
 if 'setup' in sys.argv:
     setup()
+    print('Setup successfully completed. you can run <python3 run.py>')
+    sys.exit(0)
 
 correct = False
 load_from_env = True
@@ -37,7 +39,7 @@ while not force and not correct:
           .format(server=config['server'], username=config['username'], ping_timeout=config['ping_timeout']))
     i = input('Correct? (Y/n)')
     correct = not i or i.lower() == 'y'
-    if correct:
+    if not correct:
         load_from_env = False
 
 settings.save()

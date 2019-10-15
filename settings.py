@@ -32,7 +32,7 @@ class Settings:
     def get_env(self, key, message, default=None, is_password=False, load_from_env=True):
         env = None
         if load_from_env:
-            env = os.environ.get(key) if load_from_env else None
+            env = os.environ.get(key)
             if not env:
                 env = self.config.get(key)
         if not env:
