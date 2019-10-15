@@ -35,12 +35,13 @@ class Settings:
         if load_from_env:
             env = os.environ.get(key) if load_from_env else None
             if not env:
-                print('environment with key `%s` not found, trying to load from settings' % key)
                 env = self.config.get(key)
         if not env:
             if default:
                 message += f' ({default})'
             env = (getpass if is_password else input)(message + ': ')
+            if not env:
+                env = default
             self.config[key] = env
         return env
 
@@ -51,8 +52,6 @@ class Settings:
                                                'Username', load_from_env=load_from_env)
         self.config['password'] = self.get_env(self.config.get('password_key', self.DEFAULT_PASSWORD_KEY),
                                                'Password', is_password=True, load_from_env=load_from_env)
-        self.config['ping_timeout'] = self.get_env('ping_timeout', 'Maximum ping timeout in milliseconds',
-                                                   default=settings.DEFAULT_PING_TIMEOUT, load_from_env=load_from_env)
 
     def setup(self, load_from_env=True):
         self.config['server_key'] = self.get_env('server_key', 'Key of server in environment',
@@ -61,6 +60,8 @@ class Settings:
                                                    default=self.DEFAULT_USERNAME_KEY, load_from_env=load_from_env)
         self.config['password_key'] = self.get_env('password_key', 'Key of password in environment',
                                                    default=self.DEFAULT_PASSWORD_KEY, load_from_env=load_from_env)
+        self.config['ping_timeout'] = self.get_env('ping_timeout', 'Maximum ping timeout in milliseconds',
+                                                   default=settings.DEFAULT_PING_TIMEOUT, load_from_env=load_from_env)
 
 
 settings = Settings()

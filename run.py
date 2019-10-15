@@ -43,7 +43,7 @@ while not force and not correct:
 settings.save()
 
 if not force and not settings.login_pass:
-    settings.login_pass = getpass('Password: ')
+    settings.login_pass = getpass('System password: ')
 
 kill_existing_oc()
 get_server_cert()
@@ -51,7 +51,7 @@ reconnect_oc(force)
 
 down_count = 0
 down_ping_count = 0
-ping_timeout = int(config['ping_timeout'])
+ping_timeout = int(config.get('ping_timeout', settings.DEFAULT_PING_TIMEOUT))
 
 while True:
     ping_start_time = datetime.utcnow()
