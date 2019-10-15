@@ -16,12 +16,17 @@ and system of couple of my friends and it worked as well as it supposed to.
     to install openconnect run `sudo apt install openconnect`
 2. Python3
     
-    > This script is been written in python. I tried with python 3.6
+    > This script is been written in python. I tried with python 3.6.   
+    to install python 3.6 on ubuntu, run commands below:   
+    ```
+    sudo apt update
+    sudo apt install python3.6
+    ``` 
 
 
 ##  Steps
 
-1. Clone script and go in directory
+1. Clone script and go to directory
 
 ```bash
 git clone git@github.com:saeed-kamyabi/oc.git
@@ -33,13 +38,13 @@ Set and store environments to load settings from for further usage.
 If you don't setup the script, It works properly with default settings.
 
 ```bash
-python run.py setup
+python3 run.py setup
 ```
 
 3. Run
 
 ```bash
-python run.py
+python3 run.py
 ```
 
 > server certification will be loaded automatically for data encryption.

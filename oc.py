@@ -1,9 +1,7 @@
 import os
-import subprocess
-
 import re
-
 import sys
+import subprocess
 
 from settings import settings, config
 

@@ -1,9 +1,9 @@
-import os, re
+import os
+import re
+import sys
+from datetime import datetime
 from getpass import getpass
 from time import sleep
-from datetime import datetime
-
-import sys
 
 from oc import kill_existing_oc, get_server_cert, reconnect_oc
 from settings import settings, config
