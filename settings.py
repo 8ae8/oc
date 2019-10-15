@@ -18,12 +18,12 @@ class Settings:
         self.config = dict()
 
     def load(self):
+        self.config['ping_timeout'] = self.DEFAULT_PING_TIMEOUT
         if not os.path.exists(self.file_path):
             return
         with open(self.file_path, 'r') as f:
             content = f.read()
             self.config.update(json.loads(content))
-        self.config['ping_timeout'] = self.DEFAULT_PING_TIMEOUT
 
     def save(self):
         with open(self.file_path, 'w+') as f:
