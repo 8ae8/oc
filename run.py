@@ -5,7 +5,7 @@ from datetime import datetime
 from getpass import getpass
 from time import sleep
 
-from oc import kill_existing_oc, get_server_cert, reconnect_oc
+from oc import kill_existing_oc, get_server_cert, reconnect_oc, ensure_oc_connected
 from settings import settings, config
 
 settings.load()
@@ -71,7 +71,7 @@ while True:
     ttl = re.findall('ttl=(\d+)', response)
     time = re.findall('time=(.+) ms', response)
     print('{now} ttl: {ttl}, time: {time}'
-          .format(now=datetime.now(),
+          .format(now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                   ttl=ttl[0] if ttl else -1,
                   time=time[0] if time else -1))
 
@@ -82,11 +82,14 @@ while True:
     if not first_time or 0 < first_time > ping_timeout:
         down_count += 1
         print('tried {down_count} times'.format(down_count=down_count))
-        if down_count > 3:
+        if down_count >= 3:
             down_count = 0
             is_up = False
     elif 0 < first_time < ping_timeout:
         down_count = down_ping_count = 0
+
+    if is_up:
+        is_up = ensure_oc_connected()
 
     if is_up:
         print(ping_address, 'is up!')
