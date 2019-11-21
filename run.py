@@ -89,7 +89,8 @@ while True:
         down_count = down_ping_count = 0
 
     if is_up:
-        is_up = ensure_oc_connected()
+        if not ensure_oc_connected():
+            down_count = 999
 
     if is_up:
         print(ping_address, 'is up!')

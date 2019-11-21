@@ -4,6 +4,9 @@ import sys
 import subprocess
 from threading import Thread
 
+import errno
+from time import sleep
+
 from settings import settings, config
 
 pid_file_path = 'oc.pid'
@@ -50,12 +53,13 @@ def reconnect_oc(force):
                     settings_path=settings_path)
     else:
         cmd = "echo '{password}' | openconnect -u {username} --authgroup MGT --servercert {cert} {server} " \
-                 "--passwd-on-stdin --background --pid-file {pid_file_path}" \
+              "--passwd-on-stdin --background --pid-file {pid_file_path}" \
             .format(password=config['password'], username=config['username'], cert=settings.server_cert,
                     server=config['server'], pid_file_path=pid_file_path)
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-    t = Thread(target=read_process_output, args=(process,))
-    t.start()
+    if force:
+        t = Thread(target=read_process_output, args=(process,))
+        t.start()
     settings.current_pid = process.pid
     is_connected = True
 
@@ -66,22 +70,53 @@ disconnect_patterns = [
 ]
 
 
+def pid_exists(pid):
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except OSError as err:
+        if err.errno == errno.ESRCH:
+            # ESRCH == No such process
+            return False
+        elif err.errno == errno.EPERM:
+            print(f"access to PID {pid} denied")
+            return True
+        else:
+            # According to "man 2 kill" possible error values are
+            # (EINVAL, EPERM, ESRCH)
+            raise
+    else:
+        return True
+
+
 def read_process_output(process):
     global is_connected
     if process:
         while True:
-            output = process.stdout.readline()
-            if output == '' and process.poll() is not None:
+            sleep(1)
+            print('checking oc...')
+            if not pid_exists(process.pid):
+                print("process PID does not exist")
+                is_connected = False
                 break
+            output = process.stdout.readline()
+            poll = process.poll()
+            if not output and (not poll or poll < 0):
+                print('> oc Disconnected with no output!')
+                is_connected = False
+                sleep(10)
+                continue
 
             if output:
                 output = output.decode().strip()
-                print('> ' + output)
+                print(f'> output: {output}')
                 for item in disconnect_patterns:
                     if item in output:
                         print('> oc Disconnected!')
                         is_connected = False
                         break
+        print('oc process check Done!')
         rc = process.poll()
         return rc
 
