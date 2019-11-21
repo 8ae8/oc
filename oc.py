@@ -65,6 +65,7 @@ def reconnect_oc(force):
 
 
 is_connected = False
+do_close = False
 disconnect_patterns = [
     'reconnecting'
 ]
@@ -91,15 +92,17 @@ def pid_exists(pid):
 
 
 def read_process_output(process):
-    global is_connected
+    global is_connected, do_close
     if process:
         while True:
+            if do_close:
+                print('process output check stopped')
+                return
             sleep(1)
             print('checking oc...')
             if not pid_exists(process.pid):
                 print("process PID does not exist")
                 is_connected = False
-                break
             output = process.stdout.readline()
             poll = process.poll()
             if not output and (not poll or poll < 0):
@@ -115,7 +118,6 @@ def read_process_output(process):
                     if item in output:
                         print('> oc Disconnected!')
                         is_connected = False
-                        break
         print('oc process check Done!')
         rc = process.poll()
         return rc
@@ -123,3 +125,8 @@ def read_process_output(process):
 
 def ensure_oc_connected():
     return is_connected
+
+
+def stop_oc_check():
+    global do_close
+    do_close = True
