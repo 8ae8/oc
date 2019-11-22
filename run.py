@@ -1,11 +1,9 @@
-import os
-import re
 import sys
 from datetime import datetime
 from getpass import getpass
 from time import sleep
 
-from oc import kill_existing_oc, get_server_cert, reconnect_oc, ensure_oc_connected, stop_oc_check
+from oc import oc_client
 from ping import ping
 from settings import settings, config
 
@@ -48,9 +46,9 @@ settings.save()
 if not force and not settings.login_pass:
     settings.login_pass = getpass('System password: ')
 
-kill_existing_oc()
-get_server_cert()
-reconnect_oc(force)
+oc_client.kill_existing_oc()
+oc_client.get_server_cert()
+oc_client.reconnect_oc(force)
 
 # try more times on first connection to let establish
 # the connection, then check connectivity
@@ -64,7 +62,6 @@ ping_timeout = int(config.get('ping_timeout', settings.DEFAULT_PING_TIMEOUT))
 
 while True:
     is_up = True
-
     ttl, time = ping(ping_address, ping_timeout)
     print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ttl: {ttl}, time: {time}')
     if time < 0 or time > ping_timeout:
@@ -77,17 +74,17 @@ while True:
         down_count = down_ping_count = 0
 
     if is_up:
-        if not ensure_oc_connected():
+        if not oc_client.is_connected:
             down_count = 999
 
     if is_up:
         print(ping_address, 'is up!')
     else:
         down_count = down_ping_count = -more_try_times
-        stop_oc_check()
+        oc_client.check_process = False
         if force:
             break
-        reconnect_oc(force)
+        oc_client.reconnect_oc(force)
         print(ping_address, 'is down!')
 
     sleep(1)
