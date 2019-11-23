@@ -81,9 +81,9 @@ class ClientHandler:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         settings.current_pid = process.pid
         self.is_connected = True
-        # if force:
-        t = Thread(target=self.read_process_output, args=(process,))
-        t.start()
+        if force:
+            t = Thread(target=self.read_process_output, args=(process,))
+            t.start()
 
     def pid_exists(self, pid):
         if pid <= 0:
