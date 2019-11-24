@@ -21,3 +21,4 @@ venv/
 
 settings.json
 oc.pid
+*.log

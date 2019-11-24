@@ -9,6 +9,7 @@ class Settings:
     DEFAULT_PASSWORD_KEY = 'oc_password'
     DEFAULT_PING_TIMEOUT = '2000'
 
+    is_background = False
     file_path = 'settings.json'
     login_pass = None
     current_pid = None
