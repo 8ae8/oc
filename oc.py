@@ -10,7 +10,7 @@ from uuid import uuid4
 
 import errno
 
-from settings import settings, config
+from settings import settings
 
 pid_file_path = 'oc.pid'
 
@@ -51,7 +51,8 @@ class ClientHandler:
 
     @staticmethod
     def get_server_cert():
-        result = subprocess.getoutput(f"echo '-' | openconnect --authgroup MGT {config['server']} --passwd-on-stdin")
+        result = subprocess.getoutput(f"echo '-' | openconnect --authgroup MGT "
+                                      f"{settings.current_profile['server']} --passwd-on-stdin")
         cert = re.findall('--servercert (.+)\n', result)
         if not cert:
             logging.error('could not read server cert')
@@ -82,9 +83,11 @@ class ClientHandler:
         if not self.key:
             self.key = uuid4().hex
         if settings.is_background:
-            cmd = f'echo {config["password"]} | openconnect -u {config["username"]} --authgroup MGT ' \
-                  f'--servercert {settings.server_cert} {config["server"]} --passwd-on-stdin --background ' \
-                  f'--pid-file {pid_file_path} --useragent={self.key}'
+            cmd = f'echo {settings.current_profile["password"]} | openconnect ' \
+                  f'-u {settings.current_profile["username"]} --authgroup MGT ' \
+                  f'--servercert {settings.server_cert} {settings.current_profile["server"]} ' \
+                  f'--passwd-on-stdin --background --pid-file {pid_file_path} ' \
+                  f'--useragent={self.key}'
         else:
             current_dir = os.path.dirname(os.path.abspath(__file__))
             settings_path = os.path.join(current_dir, 'settings.json')
