@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 import sys
@@ -10,6 +9,7 @@ from uuid import uuid4
 
 import errno
 
+from log import Log
 from settings import settings
 
 pid_file_path = 'oc.pid'
@@ -55,11 +55,11 @@ class ClientHandler:
                                       f"{settings.current_profile['server']} --passwd-on-stdin")
         cert = re.findall('--servercert (.+)\n', result)
         if not cert:
-            logging.error('could not read server cert')
+            Log.error('could not read server cert')
             sys.exit()
         cert = cert[0]
         settings.server_cert = cert
-        logging.info('server cert: {cert}'.format(cert=cert))
+        Log.info('server cert: {cert}'.format(cert=cert))
 
     def kill_existing_oc(self):
         try:
@@ -79,7 +79,7 @@ class ClientHandler:
 
     def reconnect_oc(self):
         self.kill_existing_oc()
-        logging.info('connecting oc...')
+        Log.info('connecting oc...')
         if not self.key:
             self.key = uuid4().hex
         if settings.is_background:
@@ -134,7 +134,7 @@ class ClientHandler:
                         exists = True
                 else:
                     if not self.key:
-                        logging.debug('waiting for process to run')
+                        Log.debug('waiting for process to run')
                         continue
                     out, _ = subprocess.Popen(f'ps a | grep {self.key}', shell=True,
                                               stdout=subprocess.PIPE).communicate()
@@ -159,17 +159,17 @@ class ClientHandler:
                 output = process.stdout.readline()
                 poll = process.poll()
                 if not output and (not poll or poll < 0):
-                    # logging.debug('oc Disconnected with no output!')
+                    # Log.debug('oc Disconnected with no output!')
                     self.is_connected = False
                     sleep(10)
                     continue
 
                 if output:
                     output = output.decode().strip()
-                    # logging.debug(f'> output: {output}')
+                    # Log.debug(f'> output: {output}')
                     for item in self.disconnect_patterns:
                         if item in output:
-                            logging.debug('> oc Disconnected!')
+                            Log.debug('> oc Disconnected!')
                             self.is_connected = False
 
 

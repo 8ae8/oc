@@ -1,12 +1,10 @@
-import logging
 import re
 import sys
 from datetime import datetime
 from getpass import getpass
 from time import sleep
 
-import os
-
+from log import Log
 from oc import oc_client
 from ping import ping
 from settings import settings
@@ -128,22 +126,7 @@ while not settings.is_background and not correct:
 
 settings.save()
 
-# log
-log_enabled = '-l' in sys.argv
-log_path = 'oc.log'
-if settings.is_background:
-    if os.path.exists(log_path):
-        os.remove(log_path)
-log_kwargs = dict()
-if log_enabled:
-    log_kwargs.update(dict(filename=log_path, filemode='a'))
-logging.basicConfig(
-    **log_kwargs,
-    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-    datefmt='%H:%M:%S',
-    level=logging.DEBUG)
-logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-#
+Log.initialize(settings.is_background)
 
 if not settings.is_background and not settings.login_pass:
     settings.login_pass = getpass('System password: ')
@@ -165,10 +148,10 @@ ping_timeout = int(settings.current_profile.get('ping_timeout', settings.DEFAULT
 while True:
     is_up = True
     ttl, time = ping(ping_address, ping_timeout)
-    logging.debug(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ttl: {ttl}, time: {time}')
+    Log.debug(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ttl: {ttl}, time: {time}')
     if time < 0 or time > ping_timeout:
         down_count += 1
-        logging.debug('tried {down_count} times'.format(down_count=down_count))
+        Log.debug('tried {down_count} times'.format(down_count=down_count))
         if down_count >= try_times:
             down_count = 0
             is_up = False
@@ -181,13 +164,13 @@ while True:
             down_count = 999
 
     if is_up:
-        logging.debug(f'{ping_address} is up!')
+        Log.debug(f'{ping_address} is up!')
     else:
         down_count = down_ping_count = -more_try_times
         oc_client.check_process_enabled = False
         if settings.is_background:
             sys.exit()
         oc_client.reconnect_oc()
-        logging.debug(f'{ping_address} is down!')
+        Log.debug(f'{ping_address} is down!')
 
     sleep(1)
