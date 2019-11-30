@@ -59,7 +59,7 @@ def proc():
                 selected_number = int(_i)
                 return True
         except:
-            return None
+            pass
     if _i:
         _i = _i.lower()
         if _i == 'a':
