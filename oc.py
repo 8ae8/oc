@@ -51,8 +51,9 @@ class ClientHandler:
 
     @staticmethod
     def get_server_cert():
-        result = subprocess.getoutput(f"echo '-' | openconnect --no-dtls --authgroup MGT "
-                                      f"{settings.current_profile['server']} --passwd-on-stdin")
+        result = subprocess.getoutput(f"echo {settings.current_profile['password']} | openconnect "
+                                      f"--no-dtls --authgroup MGT {settings.current_profile['server']}"
+                                      f" --passwd-on-stdin")
         cert = re.findall('--servercert (.+)\n', result)
         if not cert:
             Log.error('could not read server cert')
