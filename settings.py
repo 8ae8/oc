@@ -14,7 +14,7 @@ class Settings:
     login_pass = None
     current_pid = None
     server_cert = None
-    _current_profile = dict()
+    _current_profile = None
 
     def __init__(self):
         self.profiles = list()
@@ -22,7 +22,7 @@ class Settings:
 
     @property
     def current_profile(self):
-        if not self._current_profile and self.profiles:
+        if self._current_profile is None and self.profiles:
             self._current_profile = settings.profiles[0]
         return self._current_profile
 
@@ -58,6 +58,8 @@ class Settings:
         return self.current_profile
 
     def get_env(self, key, message, static_key=None, default=None, is_password=False, load_from_env=True):
+        if self.current_profile is None:
+            self.current_profile = dict()
         if not static_key:
             static_key = key
         env = None
@@ -77,14 +79,14 @@ class Settings:
     def get_environments(self, load_from_env=True):
         profile = dict()
         profile['server'] = self.get_env(self.g.get('server_key', self.DEFAULT_SERVER_KEY),
-                                      'Server (IP/URL:Port)', static_key='server',
-                                      load_from_env=load_from_env)
+                                         'Server (IP/URL:Port)', static_key='server',
+                                         load_from_env=load_from_env)
         profile['username'] = self.get_env(self.g.get('username_key', self.DEFAULT_USERNAME_KEY),
-                                        'Username', static_key='username',
-                                        load_from_env=load_from_env)
+                                           'Username', static_key='username',
+                                           load_from_env=load_from_env)
         profile['password'] = self.get_env(self.g.get('password_key', self.DEFAULT_PASSWORD_KEY),
-                                        'Password', static_key='password', is_password=True,
-                                        load_from_env=load_from_env)
+                                           'Password', static_key='password', is_password=True,
+                                           load_from_env=load_from_env)
         if profile not in self.profiles:
             self.profiles.append(profile)
         self.current_profile = profile

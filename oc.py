@@ -56,6 +56,8 @@ class ClientHandler:
                                       f" --passwd-on-stdin")
         cert = re.findall('--servercert (.+)\n', result)
         if not cert:
+            if "Connected to HTTPS" in result:
+                return
             Log.error('could not read server cert')
             sys.exit()
         cert = cert[0]
@@ -85,10 +87,12 @@ class ClientHandler:
             self.key = uuid4().hex
         if settings.is_background:
             cmd = f'echo {settings.current_profile["password"]} | openconnect ' \
-                  f'-u {settings.current_profile["username"]} --authgroup MGT ' \
-                  f'--servercert {settings.server_cert} {settings.current_profile["server"]} ' \
-                  f'--passwd-on-stdin --background --pid-file {pid_file_path} ' \
-                  f'--useragent={self.key}'
+                  f'-u {settings.current_profile["username"]} --authgroup MGT '
+            if settings.server_cert:
+                cmd += f'--servercert {settings.server_cert} '
+            cmd += f'{settings.current_profile["server"]} ' \
+                   f'--passwd-on-stdin --background --pid-file {pid_file_path} ' \
+                   f'--useragent={self.key}'
         else:
             current_dir = os.path.dirname(os.path.abspath(__file__))
             settings_path = os.path.join(current_dir, 'settings.json')

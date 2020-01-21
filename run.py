@@ -44,6 +44,33 @@ force_list_profile = False
 selected_number = None
 
 
+def is_add(_i):
+    global is_adding, do_load_from_env
+
+    if _i == 'a':
+        settings.current_profile = dict()
+        is_adding = True
+        do_load_from_env = False
+        return True
+    return False
+
+
+def handle_delete(_i):
+    global do_load_from_env, force_list_profile
+
+    d = re.findall('d (\d+)', _i)
+    if d:
+        ind = int(d[0])
+        ind -= 1
+        if 0 <= ind < len(settings.profiles):
+            del settings.profiles[ind]
+            force_list_profile = True
+            do_load_from_env = True
+            settings.current_profile = None
+        return True
+    return False
+
+
 def proc():
     global is_adding, do_load_from_env, force_list_profile, selected_number
 
@@ -62,24 +89,13 @@ def proc():
             pass
     if _i:
         _i = _i.lower()
-        if _i == 'a':
-            is_adding = True
-            do_load_from_env = False
+        if is_add(_i):
+            return None
+        if handle_delete(_i):
             return None
         else:
-            d = re.findall('d (\d+)', _i)
-            if d:
-                ind = int(d[0])
-                ind -= 1
-                if 0 <= ind < len(settings.profiles):
-                    del settings.profiles[ind]
-                    force_list_profile = True
-                    do_load_from_env = True
-                    settings.current_profile.clear()
-                return None
-            else:
-                print('You must pass item number to delete profile (e.g. d 1).')
-                return proc()
+            print('You must pass item number to delete profile (e.g. d 1).')
+            return proc()
 
 
 while not settings.is_background and not correct:
@@ -88,17 +104,17 @@ while not settings.is_background and not correct:
     is_adding = False
     print(f'ping timeout: {settings.g["ping_timeout"]}')
     if len(settings.profiles) > 0:
+        print()
+        print('[option] [arg]')
+        print('Options:')
+        print('a\t: add new profile')
+        print('d\t: delete existing profile(d {index})')
+        print()
+        print('profiles:')
+        print('- Enter profile number/option which is described:')
+        print()
         if force_list_profile or len(settings.profiles) > 1:
             selected_number = None
-            print()
-            print('[option] [arg]')
-            print('Options:')
-            print('a\t: add new profile')
-            print('d\t: delete existing profile(d {index})')
-            print()
-            print('profiles:')
-            print('- Enter profile number/option which is described:')
-            print()
             selected_profile = settings.g.get('selected_profile', -1)
             for i, conf in enumerate(settings.profiles):
                 if selected_profile == i + 1:
@@ -120,8 +136,13 @@ while not settings.is_background and not correct:
             print(f'Selected {selected_number}- host: {settings.current_profile["server"]}, '
                   f'username: {settings.current_profile["username"]}, password: ***')
             i = input('Correct? (Y/n) ')
+            if is_add(i):
+                continue
+            if handle_delete(i):
+                continue
             correct = not i or i.lower() == 'y'
         if not correct:
+            settings.current_profile = dict()
             do_load_from_env = False
 
 settings.save()
