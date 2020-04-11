@@ -67,4 +67,19 @@ python3 run.py setup
 python3 run.py
 ```
 
+Parameters:
+
+Parameter | Description
+--- | ---
+-i | selected index of profile
+-p | inline system password
+-y | accept question prompt
+
+run vpn without any prompt:   
+for example for profile 2 and system password of `123456` command would be:
+
+```bash
+python3 run.py -i 2 -y -p 123456
+``` 
+
 > server certification will be loaded automatically for data encryption.

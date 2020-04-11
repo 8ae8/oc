@@ -27,6 +27,24 @@ if '-k' in sys.argv:
     if ki:
         oc_client.key = sys.argv[ki + 1]
 
+profile_index = 0
+if '-i' in sys.argv:
+    ind = sys.argv.index('-i')
+    if ind:
+        try:
+            profile_index = int(sys.argv[ind + 1])
+        except:
+            print('index must be integer')
+            exit(1)
+
+yes = '-y' in sys.argv
+
+settings.login_pass = None
+if '-p' in sys.argv:
+    ki = sys.argv.index('-p')
+    if ki:
+        settings.login_pass = sys.argv[ki + 1]
+
 
 def setup():
     settings.setup(load_from_env=False)
@@ -75,9 +93,13 @@ def proc():
     global is_adding, do_load_from_env, force_list_profile, selected_number
 
     q = 'Which one?'
+
     if selected_number:
         q += f' ({selected_number}) '
-    _i = input(q)
+    if profile_index > 0:
+        _i = profile_index
+    else:
+        _i = input(q)
     if not is_adding:
         if not _i:
             _i = selected_number
@@ -135,12 +157,15 @@ while not settings.is_background and not correct:
         if not is_adding:
             print(f'Selected {selected_number}- host: {settings.current_profile["server"]}, '
                   f'username: {settings.current_profile["username"]}, password: ***')
-            i = input('Correct? (Y/n) ')
-            if is_add(i):
-                continue
-            if handle_delete(i):
-                continue
-            correct = not i or i.lower() == 'y'
+            if yes:
+                correct = True
+            else:
+                i = input('Correct? (Y/n) ')
+                if is_add(i):
+                    continue
+                if handle_delete(i):
+                    continue
+                correct = not i or i.lower() == 'y'
         if not correct:
             settings.current_profile = dict()
             do_load_from_env = False
